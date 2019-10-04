@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'pwPractica2'
+version '1.0-SNAPSHOT'
+
+mainClassName = 'pw.practica2.Main'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    //Spark
+    compile 'com.sparkjava:spark-core:2.9.1'
+    //Sistema de plantillas FreeMarker
+    compile 'com.sparkjava:spark-template-freemarker:2.5.5'
+    compile 'org.freemarker:freemarker:2.3.26-incubating'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
