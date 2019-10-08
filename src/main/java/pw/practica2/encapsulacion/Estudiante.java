@@ -48,4 +48,9 @@ public class Estudiante {
     public void setTelefono(String telefono) {
         this.telefono = telefono;
     }
+
+    @Override
+    public String toString() {
+        return this.matricula + " " + this.nombre + " " + this.apellido + " " + this.telefono;
+    }
 }
