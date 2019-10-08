@@ -11,7 +11,7 @@
     <body>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <a class="navbar-brand" href="/">
-                <img src="/imagenes/student.ico" alt="Logo" width="70" height="40">
+                <img src="/imagenes/student.ico" alt="Logo" width="60" height="40">
             </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -22,7 +22,7 @@
                         <a class="nav-link" href="/">Listado <span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item active">
-                        <a class="nav-link" href="/agregarEst">Agregar</a>
+                        <a class="nav-link" href="/formEst">Agregar</a>
                     </li>
                 </ul>
             </div>
@@ -34,6 +34,25 @@
                     <h3><#if (estudiante.matricula)??>Editar<#else>Registrar</#if> Estudiante</h3>
                 </div>
                 <div class="card-body">
+
+                    <#if (exito)??>
+                        <div class="alert alert-success" role="alert">
+                            ${exito}
+                        </div>
+                    <#elseif (existe)??>
+                        <div class="alert alert-warning" role="alert">
+                            ${existe}
+                        </div>
+                    <#elseif (error)??>
+                        <div class="alert alert-danger" role="alert">
+                            ${error}
+                        </div>
+                    <#elseif (errorEdit)??>
+                        <div class="alert alert-danger" role="alert">
+                            ${errorEdit}
+                        </div>
+                    </#if>
+
                     <form action="/<#if (estudiante.matricula)??>editarEst/${estudiante.matricula?string["0"]}<#else>agregarEst</#if>" method="post">
                         <div class="form-group">
                             <label for="matricula">Matr&iacute;cula:</label>
@@ -51,7 +70,28 @@
                             <label for="telefono">Tel&eacute;fono:</label>
                             <input type="tel" class="form-control" name="telefono" id="telefono" placeholder="Tel&eacute;fono" value="<#if (estudiante.telefono)??>${estudiante.telefono}</#if>">
                         </div>
-                        <button type="submit" class="btn btn-primary">Guardar</button>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Guardar</button>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalCenterTitle">Guardar Cambios</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <h5 class="h5">¿Esta seguro que desea guardar los cambios?</h5>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary">Guardar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>

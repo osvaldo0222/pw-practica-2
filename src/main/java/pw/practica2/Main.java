@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import pw.practica2.encapsulacion.Controladora;
 import pw.practica2.encapsulacion.Estudiante;
 import spark.ModelAndView;
 import spark.Session;
@@ -18,21 +19,12 @@ public class Main {
         //Recursos publicos
         staticFiles.location("/publico");
 
-        get("/", (request, response) -> {
-            Session sesion = request.session(true);
-            Map<String, Object> values = new HashMap<>();
-            ArrayList<Estudiante> estudiantes = sesion.attribute("estudiantes");
-            if (estudiantes == null) {
-                estudiantes = new ArrayList<>();
+        //Coleccion Estatica
+        Controladora control = Controladora.getInstance();
 
-                //Aux Values
-                Estudiante x = new Estudiante(20161229, "Osvaldo", "Fernandez", "809-570-2418");
-                Estudiante y = new Estudiante(20161143, "Edgar", "Garcia", "809-570-2418");
-                estudiantes.add(x);
-                estudiantes.add(y);
-            }
-            sesion.attribute("estudiantes", estudiantes);
-            values.put("estudiantes", estudiantes);
+        get("/", (request, response) -> {
+            Map<String, Object> values = new HashMap<>();
+            values.put("estudiantes", control.getEstudiantes());
             return renderFreemarker(values, "/Estudiantes.ftl");
         });
 
@@ -41,67 +33,70 @@ public class Main {
         });
 
         post("/agregarEst", (request, response) -> {
-            Session sesion = request.session();
+            Map<String, Object> logs = new HashMap<>();
+            String log = "";
             String matricula = request.queryParams("matricula");
             String nombre = request.queryParams("nombre");
             String apellido = request.queryParams("apellido");
             String telefono = request.queryParams("telefono");
-            if (matricula != null && nombre != null && apellido != null) {
+            if (matricula != null && isNumeric(matricula) && nombre != null && !nombre.equalsIgnoreCase("") && apellido != null && !apellido.equalsIgnoreCase("")) {
                 Estudiante aux = new Estudiante(Integer.parseInt(matricula), nombre, apellido, telefono);
-                ArrayList<Estudiante> estudiantes = sesion.attribute("estudiantes");
-                if (buscarEstudiante(estudiantes, Integer.parseInt(matricula)) == null) {
-                    estudiantes.add(aux);
+                if (control.buscarEstudiante(Integer.parseInt(matricula)) == null) {
+                    control.addEstudiante(aux);
+                    log = "Estudiante agregado con exito!";
+                    logs.put("exito", log);
+                } else {
+                    log = "Este estudiante ya existe!";
+                    logs.put("existe", log);
                 }
-                sesion.attribute("estudiantes", estudiantes);
-                response.redirect("/formEst");
+            } else {
+                log = "Revise los campos";
+                logs.put("error", log);
             }
-            return "";
+            return renderFreemarker(logs, "/FormEst.ftl");
         });
 
         get("/formEst/:matricula", (request, response) -> {
-            Session session = request.session();
             Map<String, Object> values = new HashMap<>();
-            Estudiante aux = buscarEstudiante(session.attribute("estudiantes"), Integer.parseInt(request.params("matricula")));
+            Estudiante aux = control.buscarEstudiante(Integer.parseInt(request.params("matricula")));
             values.put("estudiante", aux);
             return renderFreemarker(values, "/FormEst.ftl");
         });
 
         get("/showEstudiante/:matricula", (request, response) -> {
-            Session session = request.session();
             Map<String, Object> values = new HashMap<>();
-            Estudiante aux = buscarEstudiante(session.attribute("estudiantes"), Integer.parseInt(request.params("matricula")));
+            Estudiante aux = control.buscarEstudiante(Integer.parseInt(request.params("matricula")));
             values.put("estudiante", aux);
             return renderFreemarker(values, "/VerEstudiante.ftl");
         });
 
         post("/editarEst/:matricula", (request, response) -> {
-            Session sesion = request.session();
+            Map<String, Object> logs = new HashMap<>();
+            String log = "";
             String id = request.params("matricula");
             String matricula = request.queryParams("matricula");
             String nombre = request.queryParams("nombre");
             String apellido = request.queryParams("apellido");
             String telefono = request.queryParams("telefono");
-            if (matricula != null && nombre != null && apellido != null) {
-                ArrayList<Estudiante> estudiantes = sesion.attribute("estudiantes");
-                Estudiante old = buscarEstudiante(estudiantes, Integer.parseInt(id));
-                if (old != null) {
-                    old.setMatricula(Integer.parseInt(matricula));
-                    old.setNombre(nombre);
-                    old.setApellido(apellido);
-                    old.setTelefono(telefono);
+            if (matricula != null && isNumeric(matricula) && nombre != null && !nombre.equalsIgnoreCase("") && apellido != null && !apellido.equalsIgnoreCase("")) {
+                if(control.editEstudiante(Integer.parseInt(id), Integer.parseInt(matricula), nombre, apellido, telefono)) {
+                    response.redirect("/");
+                } else {
+                    log = "Error: matricula del estudiante debe ser unica!";
+                    logs.put("errorEdit", log);
                 }
-                sesion.attribute("estudiantes", estudiantes);
-                response.redirect("/");
+            } else {
+                log = "Revise los campos";
+                logs.put("error", log);
             }
-            return "";
+            Estudiante aux = new Estudiante(Integer.parseInt(id), nombre, apellido, telefono);
+            logs.put("estudiante", aux);
+            return renderFreemarker(logs, "/FormEst.ftl");
         });
 
         get("/eliminarEst/:matricula", (request, response) -> {
-            Session sesion = request.session();
             String id = request.params("matricula");
-            ArrayList<Estudiante> estudiantes = sesion.attribute("estudiantes");
-            estudiantes.remove(buscarEstudiante(estudiantes, Integer.parseInt(id)));
-            sesion.attribute("estudiantes", estudiantes);
+            control.delEstudiante(Integer.parseInt(id));
             response.redirect("/");
             return "";
         });
@@ -111,13 +106,14 @@ public class Main {
         return new FreeMarkerEngine().render(new ModelAndView(model, templatePath));
     }
 
-    public static Estudiante buscarEstudiante(ArrayList<Estudiante> estudiantes, Integer matricula){
-        Estudiante est = null;
-        for (Estudiante aux : estudiantes) {
-            if (aux.getMatricula() == matricula){
-                est = aux;
-            }
+    public static boolean isNumeric(String number){
+        boolean result = false;
+        try {
+            Integer.parseInt(number);
+            result = true;
+        } catch (NumberFormatException e) {
+            result = false;
         }
-        return est;
+        return result;
     }
 }
