@@ -16,6 +16,8 @@ import static spark.Spark.*;
 
 public class Main {
     public static void main(String[] args) {
+        //Codigo realizado por Osvaldo Fernandez 2016-1229
+
         //Recursos publicos
         staticFiles.location("/publico");
 
@@ -39,7 +41,7 @@ public class Main {
             String nombre = request.queryParams("nombre");
             String apellido = request.queryParams("apellido");
             String telefono = request.queryParams("telefono");
-            if (matricula != null && isNumeric(matricula) && nombre != null && !nombre.equalsIgnoreCase("") && apellido != null && !apellido.equalsIgnoreCase("")) {
+            if (matricula != null && isNumeric(matricula) && nombre != null && !nombre.equalsIgnoreCase("") && isLetter(nombre) && apellido != null && !apellido.equalsIgnoreCase("") && isLetter(apellido) && telefono != null && !telefono.equalsIgnoreCase("") && isNumeric(telefono)) {
                 Estudiante aux = new Estudiante(Integer.parseInt(matricula), nombre, apellido, telefono);
                 if (control.buscarEstudiante(Integer.parseInt(matricula)) == null) {
                     control.addEstudiante(aux);
@@ -48,10 +50,14 @@ public class Main {
                 } else {
                     log = "Este estudiante ya existe!";
                     logs.put("existe", log);
+                    logs.put("estudiante", new Estudiante(Integer.parseInt(matricula), nombre, apellido, telefono));
+                    logs.put("agregar", true);
                 }
             } else {
                 log = "Revise los campos";
                 logs.put("error", log);
+                logs.put("estudiante", new Estudiante(isNumeric(matricula)?Integer.parseInt(matricula):0, nombre, apellido, telefono));
+                logs.put("agregar", true);
             }
             return renderFreemarker(logs, "/FormEst.ftl");
         });
@@ -78,7 +84,7 @@ public class Main {
             String nombre = request.queryParams("nombre");
             String apellido = request.queryParams("apellido");
             String telefono = request.queryParams("telefono");
-            if (matricula != null && isNumeric(matricula) && nombre != null && !nombre.equalsIgnoreCase("") && apellido != null && !apellido.equalsIgnoreCase("")) {
+            if (matricula != null && isNumeric(matricula) && nombre != null && !nombre.equalsIgnoreCase("") && isLetter(nombre) && apellido != null && !apellido.equalsIgnoreCase("") && isLetter(apellido) && telefono != null && !telefono.equalsIgnoreCase("") && isNumeric(telefono)) {
                 if(control.editEstudiante(Integer.parseInt(id), Integer.parseInt(matricula), nombre, apellido, telefono)) {
                     response.redirect("/");
                 } else {
@@ -89,8 +95,7 @@ public class Main {
                 log = "Revise los campos";
                 logs.put("error", log);
             }
-            Estudiante aux = new Estudiante(Integer.parseInt(id), nombre, apellido, telefono);
-            logs.put("estudiante", aux);
+            logs.put("estudiante", new Estudiante(Integer.parseInt(id), nombre, apellido, telefono));
             return renderFreemarker(logs, "/FormEst.ftl");
         });
 
@@ -109,10 +114,21 @@ public class Main {
     public static boolean isNumeric(String number){
         boolean result = false;
         try {
-            Integer.parseInt(number);
+            Long.parseLong(number);
             result = true;
         } catch (NumberFormatException e) {
             result = false;
+        }
+        return result;
+    }
+
+    public static boolean isLetter(String palabra){
+        boolean result = true;
+        for (char aux : palabra.toCharArray()) {
+            if (!Character.isLetter(aux) && !Character.isSpaceChar(aux)){
+                result = false;
+                break;
+            }
         }
         return result;
     }
