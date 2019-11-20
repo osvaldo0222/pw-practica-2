@@ -17,6 +17,7 @@ import static spark.Spark.*;
 public class Main {
     public static void main(String[] args) {
         //Codigo realizado por Osvaldo Fernandez 2016-1229
+        port(10000);
 
         //Recursos publicos
         staticFiles.location("/publico");
