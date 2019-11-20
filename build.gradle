@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'com.github.johnrengelman.shadow' version '4.0.4'
 }
 
 group 'pwPractica2'
@@ -12,6 +13,12 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+}
+
+shadowJar {
+    baseName = 'NoteIT-BLOG'
+    classifier = null
+    version = null
 }
 
 dependencies {

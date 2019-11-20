@@ -72,7 +72,11 @@ public class Main {
         get("/showEstudiante/:matricula", (request, response) -> {
             Map<String, Object> values = new HashMap<>();
             Estudiante aux = control.buscarEstudiante(Integer.parseInt(request.params("matricula")));
-            values.put("estudiante", aux);
+            if (aux != null) {
+                values.put("estudiante", aux);
+            } else {
+                response.redirect("/");
+            }
             return renderFreemarker(values, "/VerEstudiante.ftl");
         });
 
