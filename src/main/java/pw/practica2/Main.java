@@ -17,7 +17,7 @@ import static spark.Spark.*;
 public class Main {
     public static void main(String[] args) {
         //Codigo realizado por Osvaldo Fernandez 2016-1229
-        port(10000);
+        port(getHerokuAssignedPort());
 
         //Recursos publicos
         staticFiles.location("/publico");
@@ -136,5 +136,17 @@ public class Main {
             }
         }
         return result;
+    }
+
+    /**
+     * Metodo para setear el puerto en Heroku
+     * @return
+     */
+    static int getHerokuAssignedPort() {
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        if (processBuilder.environment().get("PORT") != null) {
+            return Integer.parseInt(processBuilder.environment().get("PORT"));
+        }
+        return 4567; //Retorna el puerto por defecto en caso de no estar en Heroku.
     }
 }

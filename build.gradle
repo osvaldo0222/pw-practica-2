@@ -16,7 +16,7 @@ repositories {
 }
 
 shadowJar {
-    baseName = 'NoteIT-BLOG'
+    baseName = 'CRUD'
     classifier = null
     version = null
 }
@@ -30,4 +30,13 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
     compile "org.slf4j:slf4j-simple:1.7.21"
+}
+
+/**
+ * tarea necesaria para heroku si optamos por la tarea de Shadowjar
+ * en el archivo Procfile debe estar el siguiente comando:
+ * web: java -jar build/libs/sparkjava_demo.jar
+ */
+task stage {
+    dependsOn shadowJar
 }
